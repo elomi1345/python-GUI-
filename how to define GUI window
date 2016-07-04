@@ -1,0 +1,20 @@
+# python-GUI-
+from Tkinter import *
+#create new window
+root=Tk()
+
+#modify window
+root.title("GUI")
+root.geometry("200x200")
+
+
+
+#app
+app = Frame(root)
+app.grid()
+#button
+button1 = Button(app)
+button1.grid()
+button1["text"]="what does this button"
+#kick off event loop
+root.mainloop()
