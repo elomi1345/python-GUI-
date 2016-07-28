@@ -1,156 +1,54 @@
 import sys
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
-from PyQt4 import QtGui
-
-def window():
-   app = QApplication(sys.argv)
-   w = QWidget()
-   grid = QtGui.QGridLayout()
-   self.setLayout(grid)
-   names = ['a' for i in range(80)]
-   positions = [(i,j) for i in range(10) for j in range(8)]
-   for position, name in zip(positions, names):
-       button = QtGui.QPushButton(name)
-       grid.addWidget(button, *position)
-   button.clicked.connect(showdialog)
-   w.setWindowTitle("PyQt Dialog demo")
-   w.show()
-   sys.exit(app.exec_())
-	
-def showdialog():
-   msg = QMessageBox()
-   msg.setIcon(QMessageBox.Information)
-
-   msg.setText("This is a message box")
-   msg.setInformativeText("This is additional information")
-   msg.setWindowTitle("MessageBox demo")
-   msg.setDetailedText("The details are as follows:")
-   msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-   msg.buttonClicked.connect(msgbtn)
-	
-   retval = msg.exec_()
-   print "value of pressed message box button:", retval
-	
-def msgbtn(i):
-   print "Button pressed is:",i.text()
-	
-if __name__ == '__main__': 
-   window()
-   
-   
-   
-   
-   
-   
-   
-   """import sys
 import numpy as np
 import numpy
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-
+import sip
+sip.setapi('QString', 2)
+sip.setapi('QVariant', 2)
+from PyQt4 import QtGui, QtCore
+from PyQt4.QtGui import QApplication, QLineEdit
 
 atoms=np.genfromtxt('dump.coordss', delimiter=" ", names=True)
 numatoms=len(atoms)
 xa=atoms['x']
 ya=atoms['y']
 
-def window():
-   app = QApplication(sys.argv)
-   win = QDialog()
-   for i in range(numatoms):
-       b = QPushButton(win)
-       b.setText("Button1")
-       b.move(xa[i]*70,ya[i]*70)
-       b.clicked.connect(b1_clicked)
+class MyWindow(QtGui.QWidget):
+    def __init__(self, parent=None):
+        super(MyWindow, self).__init__(parent)
 
-   win.setGeometry(1000,1000,2000,1000)
-   win.setWindowTitle("PyQt")
-   win.show()
-   sys.exit(app.exec_())
+        for i in range(numatoms):
+            self.b =QtGui.QPushButton(self)
+            self.b.resize(8,8)
+            self.b.move(25+xa[i]*10,25+ya[i]*10)
+            self.b.setStyleSheet("QPushButton { background-color: light}")  
+            self.b.setCheckable(True)
+            self.b.toggle() 
+            if self.b.isChecked():
+                self.b.setStyleSheet("QPushButton { background-color: green }")    
+            self.b.clicked.connect(self.on_b_clicked)    
+        self.e1 = QLineEdit(self)
+        #self.e1.setAlignment(Qt.AlignLeft)
+        self.e1.resize(25+xa[7998]*10,100)
+        self.e1.move(25,40+ya[7998]*10)
+        self.e1.returnPressed.connect(self.b.click)
 
-def b1_clicked():
-   print "Button clicked"
+#@QtCore.pyqtSlot()
+    def on_b_clicked(self):
+        data=self.e1.toPlainText()
+        print data
+        
 
+   
+   #flo = QFormLayout(win)
+   #flo.addRow("position of atoms", e1)
+   #pb = QPushButton()
+   #pb.setObjectName("connect")
+   #pb.setText("Connect")
+
+app=QApplication(sys.argv)
+w=MyWindow()
+w.show()
+sys.exit(app.exec_())
 if __name__ == '__main__':
-   window()
-"""
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
-import sys
-from PyQt4 import QtGui
-from PyQt4.QtCore import *
-
-"""
-ZetCode PyQt4 tutorial 
-
-In this example, we create a skeleton
-of a calculator using a QtGui.QGridLayout.
-
-author: Jan Bodnar
-website: zetcode.com 
-last edited: July 2014
-"""
-
-class Example(QtGui.QWidget):
-    
-    def __init__(self):
-        super(Example, self).__init__()
-        
-        self.initUI()
-        
-    def initUI(self):
-        app = QApplication(sys.argv)
-        grid = QtGui.QGridLayout()
-        self.setLayout(grid)
- 
-        names = ['a' for i in range(80)]
-        
-        positions = [(i,j) for i in range(10) for j in range(8)]
-        
-        for position, name in zip(positions, names):
-            
-
-            button = QtGui.QPushButton(name)
-            #button.setSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
-            #grid.addWidget(button, 0, 0, 0.5, 0.5)
-            grid.addWidget(button, *position)
-            button.clicked.connect(showdialog)
-            sys.exit(app.exec_())
-             
-
-    
-        self.move(3000, 1500)
-        self.setWindowTitle('Calculator')
-        self.show()
-
-	
-def showdialog():
-   msg = QMessageBox()
-   msg.setIcon(QMessageBox.Information)
-
-   msg.setText("This is a message box")
-   msg.setInformativeText("This is additional information")
-   msg.setWindowTitle("MessageBox demo")
-   msg.setDetailedText("The details are as follows:")
-   msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-   msg.buttonClicked.connect(msgbtn)
-	
-   retval = msg.exec_()
-   print "value of pressed message box button:", retval
-	
-def msgbtn(i):
-   print "Button pressed is:",i.text()
-        
-def main():
-    app = QtGui.QApplication(sys.argv)
-    ex = Example()
-    sys.exit(app.exec_())
-
-if __name__ == '__main__':
-    main()
-
-
+   MyWindow()
 
