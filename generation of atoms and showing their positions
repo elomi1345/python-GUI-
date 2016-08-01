@@ -133,4 +133,166 @@ if __name__ == '__main__':
     w.setWindowTitle('Lattice Structure')   
     w.show()
     sys.exit(app.exec_())
+    
+    
+    
+    ########################################################
+    import sys
+import numpy as np
+import numpy
+import sip
+sip.setapi('QString', 2)
+sip.setapi('QVariant', 2)
+from PyQt4 import QtGui, QtCore
+from PyQt4.QtGui import QApplication, QLineEdit, QTextEdit, QPlainTextEdit
+
+
+class MyWindow(QtGui.QTextEdit):
+    def __init__(self, parent=None):
+        super(MyWindow, self).__init__(parent)
+        atoms=np.genfromtxt('dump.coordss', delimiter=" ", names=True)
+        numatoms=len(atoms)
+        xa=atoms['x']
+        ya=atoms['y']
+        for i in range(numatoms):
+            self.b =QtGui.QPushButton(self)
+            self.b.setText(str(i))
+            self.b.setObjectName('%d' % i)
+            self.b.resize(8,8)
+            self.b.move(40.0+xa[i]*10.0,25+ya[i]*10)
+            self.button_clicks = 0
+            self.button_clicks1=0
+            self.b.setStyleSheet("QPushButton { background-color: green}")  
+            self.b.clicked.connect(self.on_b_clicked)
+            self.b.clicked.connect(self.findcolor)
+            self.currentcolor="green"
+             
+       
+        #to show atoms positions temporary 
+        self.label =QtGui.QLabel("Position of atom: ",self)
+        self.label.move(25,38+ya[7998]*10)
+        self.e1 = QPlainTextEdit(self)
+        self.e1.resize(25+xa[7929]*10,150)
+        self.e1.move(40,60+ya[7929]*10)
+        #to get the positions text file 
+        self.label =QtGui.QLabel("Position of selected atoms:",self)
+        self.label.move(65+xa[7935]*10,38+ya[7998]*10)
+        self.e2 = QPlainTextEdit(self)
+        self.e2.resize(25+xa[7929]*10,150)
+        self.e2.move(65+xa[7935]*10,60+ya[7998]*10)
+        self.button =QtGui.QPushButton(self)
+        self.button.setText('Update List')
+        self.button.move(100+xa[7935]*10+xa[7929]*10,80+ya[7998]*10)
+        self.button.clicked.connect(self.on_button_clicked)
+        """self.atomlist=np.empty([0,3],int)
+        self.atomlist2=np.empty([0,3],int)
+        self.atomlist2=np.append(self.atomlist2, [[1, 2, 2],[1, 2, 2],[3, 5, 8],[4, 1, 2]], axis=0)
+        #print self.atomlist2
+        for i in self.atomlist2:
+            self.update=np.empty([4,3],int)
+            v=[]
+            if i not in self.update:
+                print i
+                v=i
+                self.update=np.append(self.update, [v], axis=0)
+        print self.update"""
+        #self.a=[1, 2, 3, 4, 5, 2, 3, 5]
+        #self.update = []
+    #def remove_duplicates():
+     #   self.update = []
+       # for i in self.atomlist:
+            
+          #  if i not in self.update:
+         #       self.update.append(i)
+        #return self.update
+        #print self.update
+        self.atomlist=[]
+        self.update=[]
+    def on_b_clicked(self):
+        atoms=np.genfromtxt('dump.coordss', delimiter=" ", names=True)
+        numatoms=len(atoms)
+        xa=atoms['x']
+        ya=atoms['y']
+        sender = self.sender()
+        # add the position of atoms to the atom list
+        
+        self.atomlist.append(int(sender.objectName()))
+        self.update=[]
+        for i in self.atomlist:
+            if i not in self.update:
+                self.update.append(i)
+
+        
+        # change the color of the button and show the position of the atoms in text edit
+
+### odd atoms
+        if int(sender.objectName()) % 2!=0:
+            self.button_clicks =self.button_clicks+int(sender.objectName())
+            if self.button_clicks % 2!=0:
+                self.e1.appendPlainText("Atom No: "+str(sender.objectName())+" "+"x: "+str(xa[int(sender.objectName())])+"  "+"y: "+str(ya[int(sender.objectName())])+ "\n")
+                
+                sender.setStyleSheet("QPushButton { background-color: red }")
+                
+            else:
+                sender.setStyleSheet("QPushButton { background-color: green }")
+
+                   
+       
+
+### even atoms
+        if int(sender.objectName()) % 2==0:
+            self.button_clicks1 =self.button_clicks1+int(sender.objectName())+1
+            if self.button_clicks1 % 2!=0:
+                self.e1.appendPlainText("Atom No:"+str(sender.objectName())+" "+"x:"+str(xa[int(sender.objectName())])+"  "+"y:"+str(ya[int(sender.objectName())])+ "\n")
+                sender.setStyleSheet("QPushButton { background-color: red}")
+
+                
+            else:
+                sender.setStyleSheet("QPushButton { background-color: green }")
+
+                
+         
+        
+    """def remove_duplicates(self):
+        self.update = np.empty([0,3],float)
+        for i in self.atomslist:
+            if i not in a:
+                self.update=np.append(self.update, i, axis=0)
+        
+        print self.update"""
+    def findcolor(self):
+        sender = self.sender()
+        if self.currentcolor=="green":
+            j=self.update.index(int(sender.objectName()))
+            del self.update[j]
+       
+         #   self.update.remove(int(sender.objectName()))
+        print self.update
+   
+ 
+
+    def on_button_clicked(self):
+        self.e2.clear()
+        atoms=np.genfromtxt('dump.coordss', delimiter=" ", names=True)
+        numatoms=len(atoms)
+        xa=atoms['x']
+        ya=atoms['y']
+        for i in self.update:
+            self.e2.appendPlainText("Atom No: "+str(i)+"  "+"x: "+str(xa[i])+"   "+"y: "+str(ya[i])+ "\n")
+        #print self.update
+        
+                            
+        
+
+
+app=QApplication(sys.argv)
+
+if __name__ == '__main__':
+    MyWindow()
+    w=MyWindow()
+    w.setGeometry(1000, 1000, 1200, 1200)
+    w.setWindowTitle('Lattice Structure')   
+    w.show()
+    sys.exit(app.exec_())
+
 
