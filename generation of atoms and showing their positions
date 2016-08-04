@@ -5,409 +5,111 @@ import sip
 sip.setapi('QString', 2)
 sip.setapi('QVariant', 2)
 from PyQt4 import QtGui, QtCore
-from PyQt4.QtGui import QApplication, QLineEdit, QTextEdit, QPlainTextEdit
+from PyQt4.QtGui import QApplication, QLineEdit, QTextEdit, QPlainTextEdit, QMainWindow 
 
 
-class MyWindow(QtGui.QTextEdit):
+
+
+class MyWindow(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super(MyWindow, self).__init__(parent)
-        atoms=np.genfromtxt('dump.coordss', delimiter=" ", names=True)
-        numatoms=len(atoms)
-        xa=atoms['x']
-        ya=atoms['y']
-        self.shots=[]
-        self.by=[]
-        for i in range(numatoms):
-            self.b =QtGui.QPushButton(self)
-            self.b.setText(str(i))
-            self.b.setObjectName('%d' % i)
-            self.b.resize(8,8)
-            self.b.move(40.0+xa[i]*10.0,25+ya[i]*10)
-
-            self.button_clicks = 0
-            self.button_clicks1=0
-
-            self.b.setStyleSheet("QPushButton { background-color: green}")  
- 
-            self.b.clicked.connect(self.on_b_clicked)
-
-        self.label =QtGui.QLabel("Position of atom: ",self)
-        self.label.move(25,38+ya[7998]*10)
-        self.e1 = QPlainTextEdit(self)
-        self.e1.resize(25+xa[7998]*10,150)
-        self.e1.move(40,60+ya[7998]*10)
-        
-  
-
-
-        
-
-
-    def on_b_clicked(self):
-        atoms=np.genfromtxt('dump.coordss', delimiter=" ", names=True)
-        numatoms=len(atoms)
-        xa=atoms['x']
-        ya=atoms['y']
-        sender = self.sender()
-        if int(sender.objectName()) % 2!=0:
-            self.button_clicks =self.button_clicks+int(sender.objectName())
-            if self.button_clicks % 2!=0:
-                self.e1.appendPlainText("Atom No:"+str(sender.objectName())+" "+"x:"+str(xa[int(sender.objectName())])+"  "+"y:"+str(ya[int(sender.objectName())])+ "\n")
-                
-                sender.setStyleSheet("QPushButton { background-color: red }")
-            else:
-                sender.setStyleSheet("QPushButton { background-color: green }")         
-                cursor = self.e1.textCursor()
-        # Setup the desired format for matches
-                format = QtGui.QTextCharFormat()
-                format.setBackground(QtGui.QBrush(QtGui.QColor("black")))
-        # Setup the regex engine
-                a=str(sender.objectName())
-                b=str(xa[int(sender.objectName())])
-                c=str(ya[int(sender.objectName())])
-                pattern = "Atom:"
-                regex = QtCore.QRegExp(a)
-        # Process the displayed document
-                pos = 0
-                index = regex.indexIn(self.e1.toPlainText(), pos)
-                while (index != -1):
-            # Select the matched text and apply the desired format
-                    cursor.setPosition(index)
-                    #cursor.setPosition(QtGui.QTextCursor.EndOfWord, QtGui.QTextCursor.KeepAnchor)
-                    cursor.movePosition(QtGui.QTextCursor.EndOfWord, 0)
-                    #self.e1.setTextCursor(cursor)
-                    #textSelected = cursor.selectedText()
-                    cursor.mergeCharFormat(format)
-                    #cursor.insertText("x")
-                    #self.e1.textCursor().insertText('X')
-                    #copyAvailable(True)
-  
-                    #self.e1.cut()
-            # Move to the next match
-                    #pos = index + regex.matchedLength()
-                    #index = regex.indexIn(self.e1.toPlainText(), pos)
-
-                
-                #self.e1.append("sddfg")
-                #self.e1.undo()
-        if int(sender.objectName()) % 2==0:
-            self.button_clicks1 =self.button_clicks1+int(sender.objectName())+1
-            if self.button_clicks1 % 2!=0:
-                self.e1.appendPlainText("Atom No:"+str(sender.objectName())+" "+"x:"+str(xa[int(sender.objectName())])+"  "+"y:"+str(ya[int(sender.objectName())])+ "\n")
-                sender.setStyleSheet("QPushButton { background-color: red}")
-            else:
-                sender.setStyleSheet("QPushButton { background-color: green }")
-                cursor = self.e1.textCursor()
-        # Setup the desired format for matches
-                format = QtGui.QTextCharFormat()
-                format.setBackground(QtGui.QBrush(QtGui.QColor("red")))
-        # Setup the regex engine
-                a=str(sender.objectName())
-                b=str(xa[int(sender.objectName())])
-                c=str(ya[int(sender.objectName())])
-                pattern = "Atom"+"No"
-                regex = QtCore.QRegExp(a)
-        # Process the displayed document
-                pos = 0
-                index = regex.indexIn(self.e1.toPlainText(), pos)
-                while (index != -1):
-            # Select the matched text and apply the desired format
-                    cursor.setPosition(index)
-                    cursor.movePosition(QtGui.QTextCursor.EndOfWord, 1)
-                    cursor.mergeCharFormat(format)
-                    #self.e1.cut(self)
-            # Move to the next match
-                    pos = index + regex.matchedLength()
-                    index = regex.indexIn(self.e1.toPlainText(), pos)
-
-                             
-        print self.button_clicks
-
-
-app=QApplication(sys.argv)
-
-if __name__ == '__main__':
-    MyWindow()
-    w=MyWindow()
-    w.setGeometry(1200, 1200, 1200, 1200)
-    w.setWindowTitle('Lattice Structure')   
-    w.show()
-    sys.exit(app.exec_())
-    
-    
-    
-    ########################################################
-    import sys
-import numpy as np
-import numpy
-import sip
-sip.setapi('QString', 2)
-sip.setapi('QVariant', 2)
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtGui import QApplication, QLineEdit, QTextEdit, QPlainTextEdit
-
-
-class MyWindow(QtGui.QTextEdit):
-    def __init__(self, parent=None):
-        super(MyWindow, self).__init__(parent)
-        atoms=np.genfromtxt('dump.coordss', delimiter=" ", names=True)
-        numatoms=len(atoms)
-        xa=atoms['x']
-        ya=atoms['y']
-        for i in range(numatoms):
-            self.b =QtGui.QPushButton(self)
-            self.b.setText(str(i))
-            self.b.setObjectName('%d' % i)
-            self.b.resize(8,8)
-            self.b.move(40.0+xa[i]*10.0,25+ya[i]*10)
-            self.button_clicks = 0
-            self.button_clicks1=0
-            self.b.setStyleSheet("QPushButton { background-color: green}")  
-            self.b.clicked.connect(self.on_b_clicked)
-            self.b.clicked.connect(self.findcolor)
-            self.currentcolor="green"
-             
-       
-        #to show atoms positions temporary 
-        self.label =QtGui.QLabel("Position of atom: ",self)
-        self.label.move(25,38+ya[7998]*10)
-        self.e1 = QPlainTextEdit(self)
-        self.e1.resize(25+xa[7929]*10,150)
-        self.e1.move(40,60+ya[7929]*10)
-        #to get the positions text file 
-        self.label =QtGui.QLabel("Position of selected atoms:",self)
-        self.label.move(65+xa[7935]*10,38+ya[7998]*10)
-        self.e2 = QPlainTextEdit(self)
-        self.e2.resize(25+xa[7929]*10,150)
-        self.e2.move(65+xa[7935]*10,60+ya[7998]*10)
-        self.button =QtGui.QPushButton(self)
-        self.button.setText('Update List')
-        self.button.move(100+xa[7935]*10+xa[7929]*10,80+ya[7998]*10)
-        self.button.clicked.connect(self.on_button_clicked)
-        """self.atomlist=np.empty([0,3],int)
-        self.atomlist2=np.empty([0,3],int)
-        self.atomlist2=np.append(self.atomlist2, [[1, 2, 2],[1, 2, 2],[3, 5, 8],[4, 1, 2]], axis=0)
-        #print self.atomlist2
-        for i in self.atomlist2:
-            self.update=np.empty([4,3],int)
-            v=[]
-            if i not in self.update:
-                print i
-                v=i
-                self.update=np.append(self.update, [v], axis=0)
-        print self.update"""
-        #self.a=[1, 2, 3, 4, 5, 2, 3, 5]
-        #self.update = []
-    #def remove_duplicates():
-     #   self.update = []
-       # for i in self.atomlist:
-            
-          #  if i not in self.update:
-         #       self.update.append(i)
-        #return self.update
-        #print self.update
-        self.atomlist=[]
-        self.update=[]
-    def on_b_clicked(self):
-        atoms=np.genfromtxt('dump.coordss', delimiter=" ", names=True)
-        numatoms=len(atoms)
-        xa=atoms['x']
-        ya=atoms['y']
-        sender = self.sender()
-        # add the position of atoms to the atom list
-        
-        self.atomlist.append(int(sender.objectName()))
-        self.update=[]
-        for i in self.atomlist:
-            if i not in self.update:
-                self.update.append(i)
-
-        
-        # change the color of the button and show the position of the atoms in text edit
-
-### odd atoms
-        if int(sender.objectName()) % 2!=0:
-            self.button_clicks =self.button_clicks+int(sender.objectName())
-            if self.button_clicks % 2!=0:
-                self.e1.appendPlainText("Atom No: "+str(sender.objectName())+" "+"x: "+str(xa[int(sender.objectName())])+"  "+"y: "+str(ya[int(sender.objectName())])+ "\n")
-                
-                sender.setStyleSheet("QPushButton { background-color: red }")
-                
-            else:
-                sender.setStyleSheet("QPushButton { background-color: green }")
-
-                   
-       
-
-### even atoms
-        if int(sender.objectName()) % 2==0:
-            self.button_clicks1 =self.button_clicks1+int(sender.objectName())+1
-            if self.button_clicks1 % 2!=0:
-                self.e1.appendPlainText("Atom No:"+str(sender.objectName())+" "+"x:"+str(xa[int(sender.objectName())])+"  "+"y:"+str(ya[int(sender.objectName())])+ "\n")
-                sender.setStyleSheet("QPushButton { background-color: red}")
-
-                
-            else:
-                sender.setStyleSheet("QPushButton { background-color: green }")
-
-                
+	# TODO add an option for a user to choose the file from GUI.
+        # consequently initialising self.atoms should be moved away
+        # from constructor  
+        self.atoms=np.genfromtxt('dump.coordss', delimiter=" ", names=True)
+        numatoms=len(self.atoms)
+        xa=self.atoms['x']
+        ya=self.atoms['y']
+        #openFile in main Menu
+        openFile= QtGui.QAction('&Open File', self)
+        openFile.setShortcut('Ctrl+Q')
+        openFile.setStatusTip('Open File')
+        openFile.triggered.connect(self.file_open)
+        self.statusBar()
+        menubar = self.menuBar()
+        fileMenu = menubar.addMenu('&File')
+        fileMenu.addAction(openFile)
          
-        
-    """def remove_duplicates(self):
-        self.update = np.empty([0,3],float)
-        for i in self.atomslist:
-            if i not in a:
-                self.update=np.append(self.update, i, axis=0)
-        
-        print self.update"""
-    def findcolor(self):
-        sender = self.sender()
-        if self.currentcolor=="green":
-            j=self.update.index(int(sender.objectName()))
-            del self.update[j]
-       
-         #   self.update.remove(int(sender.objectName()))
-        print self.update
-   
- 
-
-    def on_button_clicked(self):
-        self.e2.clear()
-        atoms=np.genfromtxt('dump.coordss', delimiter=" ", names=True)
-        numatoms=len(atoms)
-        xa=atoms['x']
-        ya=atoms['y']
-        for i in self.update:
-            self.e2.appendPlainText("Atom No: "+str(i)+"  "+"x: "+str(xa[i])+"   "+"y: "+str(ya[i])+ "\n")
-        #print self.update
-        
-                            
-        
-
-
-app=QApplication(sys.argv)
-
-if __name__ == '__main__':
-    MyWindow()
-    w=MyWindow()
-    w.setGeometry(1000, 1000, 1200, 1200)
-    w.setWindowTitle('Lattice Structure')   
-    w.show()
-    sys.exit(app.exec_())
-    ########################################
-    
-    
-    import sys
-import numpy as np
-import numpy
-import sip
-sip.setapi('QString', 2)
-sip.setapi('QVariant', 2)
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtGui import QApplication, QLineEdit, QTextEdit, QPlainTextEdit 
-from PyQt4.QtCore import QObject, pyqtSignal
-
-class Foo(QObject):
-
-    # Define a new signal called 'trigger' that has no arguments.
-    detectcolor = pyqtSignal()
-
-    def connect_and_emit_trigger(self):
-
-        # Emit the signal.
-        self.detectcolor.emit()
-
-
-
-class MyWindow(QtGui.QTextEdit):
-    def __init__(self, parent=None):
-        super(MyWindow, self).__init__(parent)
-        atoms=np.genfromtxt('dump.coordss', delimiter=" ", names=True)
-        numatoms=len(atoms)
-        xa=atoms['x']
-        ya=atoms['y']
-        for i in range(numatoms):
-            self.b =QtGui.QPushButton(self)
-            self.b.setText(str(i))
-            self.b.setObjectName('%d' % i)
-            self.b.resize(8,8)
-            self.b.move(40.0+xa[i]*10.0,25+ya[i]*10)
-            self.button_clicks = 0
-            self.button_clicks1=0
-            self.b.setStyleSheet("QPushButton {'background-color: rgb()'}") 
-            self.b.detectcolor.connect(self.detcolor)
-            self.b.clicked.connect(self.findcolor)
-            self.currentColor  = 'default'
-             
-       
-        #to show atoms positions temporary 
-        self.label =QtGui.QLabel("Position of atom: ",self)
-        self.label.move(25,38+ya[7998]*10)
-        self.e1 = QPlainTextEdit(self)
-        self.e1.resize(25+xa[7929]*10,150)
-        self.e1.move(40,60+ya[7929]*10)
-        #to get the positions text file 
-        self.label =QtGui.QLabel("Position of selected atoms:",self)
-        self.label.move(65+xa[7935]*10,38+ya[7998]*10)
+        #textbox and buttons
+        self.label =QtGui.QLabel("Position of atoms:",self)
+        self.label.move(40,38+ya[7998]*10)
         self.e2 = QPlainTextEdit(self)
         self.e2.resize(25+xa[7929]*10,150)
-        self.e2.move(65+xa[7935]*10,60+ya[7998]*10)
+        self.e2.move(40,60+ya[7929]*10)
         self.button =QtGui.QPushButton(self)
         self.button.setText('Update List')
-        self.button.move(100+xa[7935]*10+xa[7929]*10,80+ya[7998]*10)
+        self.button.move(70+xa[7929]*10,70+ya[7929]*10)
         self.button.clicked.connect(self.on_button_clicked)
 
-        self.atomlist=[]
-        self.update=[]
-        self.dsel=[]
-        self.dselli=[]
-        self.finallist=[]
-
-
-        
-        # change the color of the button and show the position of the atoms in text edit           
+        self.rep_atoms=[]
 
     def findcolor(self):
-        atoms=np.genfromtxt('dump.coordss', delimiter=" ", names=True)
-        numatoms=len(atoms)
-        xa=atoms['x']
-        ya=atoms['y']
+        """The function which is called when a user clicks on a atom.
+        """
+        xa=self.atoms['x']
+        ya=self.atoms['y']
+	# sender is the atom
         sender = self.sender()
+        
+        atom_id = int(sender.objectName())
+	if atom_id not in self.rep_atoms:
+            # the unclicked atom got clicked...
+  
+	    self.rep_atoms.append(atom_id)
+	    # extra printing for bauty:
+	    self.e2.appendPlainText("Atom No: "+str(atom_id)+" "+
+				    "x: "+str(xa[atom_id])+" "+
+				    "y: "+str(ya[atom_id])+"\n")
 
-        if self.currentColor=='default' :
-            self.e1.appendPlainText("Atom No: "+str(sender.objectName())+" "+"x: "+str(xa[int(sender.objectName())])+"  "+"y: "+str(ya[int(sender.objectName())])+ "\n")  
-            sender.setStyleSheet('background-color: red') 
-            self.currentColor  = 'red'
-            self.atomlist.append(int(sender.objectName()))
-            for i in self.atomlist:
-                if i not in self.update:
-                    self.update.append(i)  
-        else:
-            sender.setStyleSheet('background-color: rgb()')
-            self.currentColor  = 'default'
-            self.dsel.append(int(sender.objectName()))
-            for i in self.dsel:
-                if i not in self.dselli:
-                    self.dselli.append(int(sender.objectName()))  
-        print "selected list is:"           
-        print self.update
-       # print "deselected list is:" 
-        #print self.dselli 
-    def detcolor(self):
-        print "hey"
+	    # change coolur of the sender object (atom) to red:
+	    sender.setStyleSheet('background-color: red')
+	    
+	else:
+	    # already clicked button/atom	    
+	    self.rep_atoms.remove(atom_id)
+           
+	    # set colour of the sender object (atom) to green (?)
+	    sender.setStyleSheet('background-color: green')
+            
     
     def on_button_clicked(self):
+	"""User clicked on update_list button:"""
         self.e2.clear()
-        atoms=np.genfromtxt('dump.coordss', delimiter=" ", names=True)
-        numatoms=len(atoms)
-        xa=atoms['x']
-        ya=atoms['y']
-        self.finallist=list(set(self.update)^set(self.dselli))
-        for i in self.finallist:
-            self.e2.appendPlainText("Atom No: "+str(i)+"  "+"x: "+str(xa[i])+"   "+"y: "+str(ya[i])+ "\n")
-        #print self.update
+        xa=self.atoms['x']
+        ya=self.atoms['y']
+        for i in self.rep_atoms:
+            self.e2.appendPlainText("Atom No: "+str(i)+"  "+"x: "+str(xa[i])+"   "+"y: "+str(ya[i])) 
+
+ 
+    def file_open(self):
+        child = MyWindow(self)
+        name=QtGui.QFileDialog.getOpenFileName(self, 'openfile')
+        file = open(name,'r')
+        fname=str(name)
+        print type(fname)
+        self.buttons()
+        child.show()
+
+    def buttons(self):
+        self.atoms=np.genfromtxt('dump.coordss', delimiter=" ", names=True)    
+        numatoms=len(self.atoms)
+        xa=self.atoms['x']
+        ya=self.atoms['y'] 
+        for i in range(numatoms):
+           self.b =QtGui.QPushButton(self)
+           #self.setCentralWidget(self.b)
+           self.b.setText(str(i))
+           self.b.setObjectName('%d' % i)
+           self.b.resize(8,8)
+           self.b.move(40.0+xa[i]*10.0,25+ya[i]*10)
+           self.b.setStyleSheet("QPushButton { background-color: green}") 
+           self.b.clicked.connect(self.findcolor)
+           self.b.show()
+        
+        
         
 
+# Opens the main window (?)
 app=QApplication(sys.argv)
 
 if __name__ == '__main__':
