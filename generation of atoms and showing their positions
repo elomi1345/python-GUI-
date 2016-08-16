@@ -1,123 +1,306 @@
-import sys
-import numpy as np
-import numpy
-import sip
-sip.setapi('QString', 2)
-sip.setapi('QVariant', 2)
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtGui import QApplication, QLineEdit, QTextEdit, QPlainTextEdit, QMainWindow 
-
-
-
+from custombutton import *
+from point_on_linesegment import *
+import matplotlib
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+from matplotlib.figure import Figure
+import os
 
 class MyWindow(QtGui.QMainWindow):
     def __init__(self, parent=None):
+        """Main Function includes:
+        Main Menubar
+        Text Editor , update list & create mesh button
+        """
         super(MyWindow, self).__init__(parent)
-	# TODO add an option for a user to choose the file from GUI.
-        # consequently initialising self.atoms should be moved away
-        # from constructor  
-        self.atoms=np.genfromtxt('dump.coordss', delimiter=" ", names=True)
-        numatoms=len(self.atoms)
-        xa=self.atoms['x']
-        ya=self.atoms['y']
-        #openFile in main Menu
-        openFile= QtGui.QAction('&Open File', self)
-        openFile.setShortcut('Ctrl+Q')
+        openFile=QtGui.QAction("&Open File",self)
+        openFile.setShortcut("Ctrl+o")
         openFile.setStatusTip('Open File')
         openFile.triggered.connect(self.file_open)
-        self.statusBar()
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
         fileMenu.addAction(openFile)
-         
-        #textbox and buttons
-        self.label =QtGui.QLabel("Position of atoms:",self)
-        self.label.move(40,38+ya[7998]*10)
-        self.e2 = QPlainTextEdit(self)
-        self.e2.resize(25+xa[7929]*10,150)
-        self.e2.move(40,60+ya[7929]*10)
-        self.button =QtGui.QPushButton(self)
-        self.button.setText('Update List')
-        self.button.move(70+xa[7929]*10,70+ya[7929]*10)
-        self.button.clicked.connect(self.on_button_clicked)
+        #call main _frame function
+        self.create_main_frame()
 
+        #to get the positions text file
+        #label does not work yet FIX IT !!!
+        #self.label =QtGui.QLabel("Position of atom:",self)
+        #self.label.move(40,791)
+
+        # Auxiliary output text box
+        self.txtbox = QPlainTextEdit(self)
+        self.txtbox.resize(400,150)
+        self.txtbox.move(40,815)
+        # An update list button
+        self.update_button =QtGui.QPushButton(self)
+        self.update_button.setText('Update List')
+        self.update_button.move(450,815)
+        self.update_button.clicked.connect(self.on_update_click)
+        # A mesh button
+        self.mesh_button =QtGui.QPushButton(self)
+        self.mesh_button.setText('Create Mesh')
+        self.mesh_button.setFixedWidth(130)
+        self.mesh_button.move(450,860)
+
+        # stores repatom number
         self.rep_atoms=[]
 
-    def findcolor(self):
-        """The function which is called when a user clicks on a atom.
-        """
-        xa=self.atoms['x']
-        ya=self.atoms['y']
-	# sender is the atom
-        sender = self.sender()
-        
-        atom_id = int(sender.objectName())
-	if atom_id not in self.rep_atoms:
-            # the unclicked atom got clicked...
-  
-	    self.rep_atoms.append(atom_id)
-	    # extra printing for bauty:
-	    self.e2.appendPlainText("Atom No: "+str(atom_id)+" "+
-				    "x: "+str(xa[atom_id])+" "+
-				    "y: "+str(ya[atom_id])+"\n")
-
-	    # change coolur of the sender object (atom) to red:
-	    sender.setStyleSheet('background-color: red')
-	    
-	else:
-	    # already clicked button/atom	    
-	    self.rep_atoms.remove(atom_id)
-           
-	    # set colour of the sender object (atom) to green (?)
-	    sender.setStyleSheet('background-color: green')
-            
-    
-    def on_button_clicked(self):
-	"""User clicked on update_list button:"""
-        self.e2.clear()
-        xa=self.atoms['x']
-        ya=self.atoms['y']
-        for i in self.rep_atoms:
-            self.e2.appendPlainText("Atom No: "+str(i)+"  "+"x: "+str(xa[i])+"   "+"y: "+str(ya[i])) 
-
- 
+        # Atom id when a user did a right click
+        self.right_click_prev_atom_id=-1
     def file_open(self):
-        child = MyWindow(self)
-        name=QtGui.QFileDialog.getOpenFileName(self, 'openfile')
-        file = open(name,'r')
-        fname=str(name)
-        print type(fname)
-        self.buttons()
-        child.show()
+        """User opens the textfile which contains position of atoms.
+        """
+        name=QtGui.QFileDialog.getOpenFileName(self, 'Open File')
+        file=open(name,'r')
+        #Convert name of textfile from Unicode to string
+        self.fname=str(name)
+        self.gen_atoms()
 
-    def buttons(self):
-        self.atoms=np.genfromtxt('dump.coordss', delimiter=" ", names=True)    
-        numatoms=len(self.atoms)
-        xa=self.atoms['x']
-        ya=self.atoms['y'] 
-        for i in range(numatoms):
-           self.b =QtGui.QPushButton(self)
-           #self.setCentralWidget(self.b)
-           self.b.setText(str(i))
-           self.b.setObjectName('%d' % i)
-           self.b.resize(8,8)
-           self.b.move(40.0+xa[i]*10.0,25+ya[i]*10)
-           self.b.setStyleSheet("QPushButton { background-color: green}") 
-           self.b.clicked.connect(self.findcolor)
-           self.b.show()
-        
-        
-        
 
-# Opens the main window (?)
+    def create_main_frame(self):
+        *self.main_frame = QtGui.QWidget()
+
+        # Create the mpl Figure and FigCanvas objects.
+        # 5x4 inches, 100 dots-per-inch
+        #
+        self.dpi = 100
+        self.fig = Figure((8.0, 8.0), dpi=self.dpi)
+        self.canvas = FigureCanvas(self.fig)
+        *self.canvas.setParent(self.main_frame)
+
+        # Since we have only one plot, we can use add_axes
+        # instead of add_subplot, but then the subplot
+        # configuration tool in the navigation toolbar wouldn't
+        # work.
+        #
+        self.axes = self.fig.add_subplot(111)
+
+        # Create the navigation toolbar, tied to the canvas
+        #
+        #self.mpl_toolbar = NavigationToolbar(self.canvas, self.main_frame)
+        self.draw_button = QtGui.QPushButton(self)
+        self.draw_button.setText('Draw')
+        self.draw_button.move(450,910)
+
+        hbox = QtGui.QHBoxLayout()
+        w=self.draw_button
+
+        hbox.addWidget(w)
+        #hbox.setAlignment(w, Qt.AlignVCenter)
+
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(self.canvas)
+        vbox.addLayout(hbox)
+
+        *self.main_frame.setLayout(vbox)
+
+        *self.setCentralWidget(self.main_frame)
+
+
+    def gen_atoms(self):
+        """Acoording to the Selected textfile:
+        At position of each atom, a button will be generated.
+        """
+        self.atoms=np.genfromtxt(self.fname, delimiter=" ", names=True)
+        self.numatoms=len(self.atoms)
+        self.xa=self.atoms['x']
+        self.ya=self.atoms['y']
+
+        self.b = []
+        for i in range(self.numatoms):
+            # create buttons with CustomButton class
+            # insert each atom in an array
+            self.b.append( CustomButton(self) )
+            self.b[i].setText(str(i))
+            self.b[i].setObjectName('%d' % i)
+            self.b[i].resize(8,8)
+            self.b[i].move(40.0+self.xa[i]*10.0,25+self.ya[i]*10)
+            self.b[i].setStyleSheet("QPushButton { background-color: green}")
+            #recieves left_click signal and connect to left_click function
+            self.b[i].left_click.connect(self.left_click)
+            #recieves right_click signal and connect to right_click function
+            self.b[i].right_click.connect(self.right_click)
+            self.b[i].show()
+
+    def left_click(self):
+        """Call-back function for a left button click on an atom"""
+        self.right_click_prev_atom_id=-1
+
+        # first, add an atom:
+        self.single_choose()
+
+    def right_click(self):
+        """Call-back function for a right button click on an atom"""
+        sender = self.sender()
+        # first, add an atom:
+        self.single_choose()
+
+        # if we called twice in a raw right button:
+
+        if self.right_click_prev_atom_id>=0:
+            self.group_choose()
+        self.right_click_prev_atom_id=int(sender.objectName())
+
+    def group_choose(self):
+        """ Function which controls that an atom is
+        between two right-clicked atoms or not.
+        already called inside right_click(self)
+        """
+        sender = self.sender()
+        first_atom_id  = self.right_click_prev_atom_id
+        second_atom_id = int(sender.objectName())
+
+        for i in range(self.numatoms):
+            if (i not in self.rep_atoms) and \
+            point_within_a_segment(self.xa[first_atom_id],
+                                   self.ya[first_atom_id],
+                                   self.xa[second_atom_id],
+                                   self.ya[second_atom_id],
+                                   self.xa[i],
+                                   self.ya[i]):
+                self.rep_atoms.append(i)
+                self.b[i].setStyleSheet('background-color: red')
+
+    def single_choose(self):
+        """already called inside left_click(self) & right_click(self)
+        1) The color of button will change from green to red and vice versa for unclicking.
+        2) Position & number of marked atom will appear in text editor.
+        """
+        # sender is the atom
+        sender = self.sender()
+        atom_id = int(sender.objectName())
+
+        if atom_id not in self.rep_atoms:
+            # the unclicked atom got clicked...
+            self.rep_atoms.append(atom_id)
+
+            # extra printing for beauty:
+            self.txtbox.clear()
+            self.txtbox.appendPlainText(
+                "Atom No: "+str(atom_id)+" "+
+                "x: "+str(self.xa[atom_id])+" "+
+                "y: "+str(self.ya[atom_id]))
+
+            # change colour of the sender object (atom) to red:
+            sender.setStyleSheet('background-color: red')
+        else:
+            # already clicked button/atom
+            self.rep_atoms.remove(atom_id)
+
+            # set colour of the sender object (atom) to green
+            sender.setStyleSheet('background-color: green')
+
+    def on_update_click(self):
+        """User clicked on update_list button:
+        First of all text box will be cleaned.
+        User can observe position list for all of the marked atoms."""
+
+        self.txtbox.clear()
+        for i in self.rep_atoms:
+            self.txtbox.appendPlainText(
+                "Atom No: "+str(i)+" "+
+                "x: "+str(self.xa[i])+" "+
+                "y: "+str(self.ya[i]))
+
+
+#main settings of GUI
 app=QApplication(sys.argv)
+# enable below commands to run code directly
+#if __name__ == '__main__':
+#   w=MyWindow()
+#   w.setGeometry(1000, 1000, 1200, 1200)
+#   w.setWindowTitle('QC')
+#   w.show()
+#sys.exit(app.exec_())
+##################################################################################
+from __future__ import absolute_import
+from __future__ import print_function
+from six.moves import range
+from mywindow import *
 
+MyWindow()
+w=MyWindow()
+def example(w):
+    """Shows window
+    Store repatoms in points as the nodes of mesh.
+    """
+    w.show()
+    #User clicks on Create Mesh
+    w.mesh_button.clicked.connect(on_mesh_click)
+    w.draw_button.clicked.connect(on_mesh_click)
+    #create_main_frame()
+def on_mesh_click():
+    """get the signal and create the mesh
+    """
+    import meshpy.triangle as triangle
+    points=[]
+    for i in w.rep_atoms:
+        points.append((w.xa[i],-1*w.ya[i]))
+    def round_trip_connect(start, end):
+      result = []
+      for i in range(start, end):
+        result.append((i, i+1))
+      result.append((end, start))
+      return result
+
+    info = triangle.MeshInfo()
+    info.set_points(points)
+    info.set_facets(round_trip_connect(0, len(points)-1))
+
+    mesh = triangle.build(info, max_volume=5000, min_angle=25)
+    """store nodes(includes position of nodes)
+    & elements(includes nodes number which create every element)
+    """
+    mesh_points = np.array(mesh.points)
+    mesh_tris = np.array(mesh.elements)
+    #draw plot of mesh
+    import matplotlib.pyplot as pt
+    w.create_main_frame.axis.plot(mesh_points[:, 0], mesh_points[:, 1], mesh_tris)
+    w.canvas.draw()
+    #pt.show()
+
+
+"""def create_main_frame():
+    main_frame = QtGui.QWidget()
+
+        # Create the mpl Figure and FigCanvas objects.
+        # 5x4 inches, 100 dots-per-inch
+        #
+    dpi = 100
+    fig = Figure((4.0, 4.0), dpi=dpi)
+    canvas = FigureCanvas(fig)
+    canvas.setParent(main_frame)
+
+        # Since we have only one plot, we can use add_axes
+        # instead of add_subplot, but then the subplot
+        # configuration tool in the navigation toolbar wouldn't
+        # work.
+        #
+    axes = fig.add_subplot(111)
+
+        # Create the navigation toolbar, tied to the canvas
+        #
+    mpl_toolbar = NavigationToolbar(canvas, main_frame)
+
+    w.setCentralWidget(main_frame)"""
+
+#Opens the main window
 if __name__ == '__main__':
-    MyWindow()
     w=MyWindow()
     w.setGeometry(1000, 1000, 1200, 1200)
-    w.setWindowTitle('Lattice Structure')   
-    w.show()
-    sys.exit(app.exec_())
+    w.setWindowTitle('QC')
+    example(w)
+    """import pyqtgraph as pg
+    pg.setConfigOption('background', 'w')
+    view = pg.GraphicsWindow()  ## GraphicsView with GraphicsLayout inserted by default
+    w.setCentralWidget(view)
+    w1 = view.addPlot()
+    n = 300
+    s1 = pg.ScatterPlotItem(size=10, pen=pg.mkPen(None), brush=pg.mkBrush(255, 255, 255, 120))
+    pos = np.random.normal(size=(2,n), scale=1e-5)
+    spots = [{'pos': pos[:,i], 'data': 1} for i in range(n)] + [{'pos': [0,0], 'data': 1}]
+    s1.addPoints(spots)
+    w1.addItem(s1)"""
 
-
+sys.exit(app.exec_())
